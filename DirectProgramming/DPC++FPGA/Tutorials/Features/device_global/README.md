@@ -13,14 +13,14 @@ This FPGA tutorial explains how to use `device_global` class as a way of keeping
 This tutorial demonstrates a simple example of initializing a `device_global` to a non-zero value, and using it to keep state between multiple re-launches of a kernel.
 
 ### Description of `device_global`
-`device_globals` are an extension that introduces device scoped memory allocations into SYCL that can be accessed within a kernel using syntax similar to C++ global variables, but that have unique instances per `sycl::device`. Similar to C++ global variables, `device_globals` have namespace scope and are visible to all kernels within that scope.
+The `device_global` class is an extension that introduces device scoped memory allocations into SYCL that can be accessed within a kernel using syntax similar to C++ global variables, but that have unique instances per `sycl::device`. Similar to C++ global variables, a `device_global` variable have a namespace scope and is visible to all kernels within that scope.
 
 `device_globals` can be templated on a list of compile-time-constant `properties` that can enable various optimization behaviors. One such `property` is `device_image_scope` which is used in the code sample. It limits the scope of a single instance of a `device_global` to a `device_image`, further details on this property can be found [here](https://github.com/intel/llvm/blob/sycl/sycl/doc/extensions/proposed/sycl_ext_oneapi_device_global.asciidoc#properties-for-device-global-variables). The absence of the `device_image_scope` property is currently not supported by the compiler.
 
-`device_globals` can be used to store state across multiple re-launches of a kernel without having to pass in a `buffer` as a kernel argument. This is useful in cases where components are nodes in a state-machine.
+A `device_global` instance can be used to store state across multiple re-launches of a kernel without having to pass in a `buffer` as a kernel argument. An example of an application that would benefit from such a state is where kernels are nodes in a state-machine.
 
 ### Non-zero-initialization of a `device_global` - pre C++20
-Without C++20 `consteval` keyword support, `device_globals` are zero-initialized. If there is a known first usage of a `device_global` in device code, there exists a technique, described below, that allows a `device_global` to be initialized to a non-zero value. 
+Without C++20 `consteval` keyword support, a `device_global` is always zero-initialized. If there is a known first usage of a `device_global` in device code, there exists a technique, described below, that allows a `device_global` to be initialized to a non-zero value. 
 
 Using a second `device_global<bool>` representing a flag that will control when to initialize the `device_global` to a non-zero value. This flag will get zero-initialized to `false`. Once initialization happens, the flag is set to `true` and initialization code doesn't execute on subsequent relaunches of the kernel.
 
