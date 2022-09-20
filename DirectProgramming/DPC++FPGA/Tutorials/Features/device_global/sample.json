@@ -1,7 +1,7 @@
 {
   "guid": "CDC9540F-B89F-499E-BC27-E8EC9EA3B2D7",
-  "name": "Private Copies",
-  "categories": ["Toolkit/oneAPI Direct Programming/DPC++ FPGA/Tutorials/Features"],
+  "name": "Device Global",
+  "categories": ["Toolkit/oneAPI Direct Programming/DPC++ FPGA/Tutorials/Features/experimental"],
   "description": "An Intel® FPGA tutorial demonstrating how to use `device_global` class as a way of keeping state between multiple kernel invocations.",
   "toolchain": ["dpcpp"],
   "os": ["linux", "windows"],
