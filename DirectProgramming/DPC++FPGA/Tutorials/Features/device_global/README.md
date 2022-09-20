@@ -1,5 +1,5 @@
 # `device_global`
-This FPGA tutorial explains how to use `device_global` class as a way of keeping state between multiple kernel invocations.
+This FPGA tutorial explains how to use `device_global` class as a way of keeping a state between multiple invocations of a kernel.
 
 | Optimized for                     | Description
 |:---                                 |:---
