@@ -49,7 +49,7 @@ int main () {
 
 
 ### Non-zero-initialization of a `device_global`- with C++20
-In a future version of this extension, it is expected that when C++20 support is available and enabled, the `consteval` keyword will be used to enable compile-time constant initialization of the device allocations backing device_global. This will simplify some coding patterns, compared with the current zero-initialization requirement.
+In a future version of this extension, it is expected that when C++20 support is available and enabled, the `consteval` keyword will be used to enable compile-time constant initialization of the device allocations backing `device_global`. This will simplify some coding patterns, compared with the current zero-initialization requirement.
 
 ```cpp
 using namespace sycl::ext::oneapi::experimental;
