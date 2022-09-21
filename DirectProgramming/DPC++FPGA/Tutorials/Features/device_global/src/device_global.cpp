@@ -5,28 +5,29 @@
 // =============================================================
 #include <math.h>
 
-#include <sycl/sycl.hpp>
 #include <iostream>
 #include <sycl/ext/intel/fpga_extensions.hpp>
+#include <sycl/sycl.hpp>
 
 // dpc_common.hpp can be found in the dev-utilities include folder.
 // e.g., $ONEAPI_ROOT/dev-utilities//include/dpc_common.hpp
 #include "dpc_common.hpp"
-
-using namespace sycl;
-using namespace sycl::ext::oneapi::experimental;
 
 constexpr size_t kNumCounters = 4;
 constexpr int kInitialValue = 10;
 constexpr unsigned kNumIncrements = 3;
 
 using IntScalar = std::array<int, 1>;
-using FPGAProperties = decltype(properties(device_image_scope));
+using FPGAProperties = decltype(sycl::ext::oneapi::experimental::properties(
+    sycl::ext::oneapi::experimental::device_image_scope));
 
 // Array of counters that have a lifetime longer than a single kernel invocation
-device_global<int[kNumCounters], FPGAProperties> counters;
-// Flag if the counters have been initialized
-device_global<bool, FPGAProperties> is_counters_initialized;
+sycl::ext::oneapi::experimental::device_global<int[kNumCounters],
+                                               FPGAProperties>
+    counters;
+// Flag if the counters have been initialized - zero-initialized to `false`
+sycl::ext::oneapi::experimental::device_global<bool, FPGAProperties>
+    is_counters_initialized;
 
 // Forward declare the kernel name in the global scope.
 // This FPGA best practice reduces name mangling in the optimization reports.
@@ -34,15 +35,16 @@ class Kernel;
 
 // Launch a kernel that increments the value of a global variable counter
 // at a particular index, and returns the current value of that counter
-void IncrementAndRead(const device_selector &selector, IntScalar &result,
+void IncrementAndRead(const sycl::device_selector &selector, IntScalar &result,
                       int index) {
   try {
-    queue q(selector, dpc_common::exception_handler,
-            property::queue::enable_profiling{});
+    sycl::queue q(selector, dpc_common::exception_handler,
+                  sycl::property::queue::enable_profiling{});
 
-    buffer<int, 1> buffer_result(result.data(), 1);
-    q.submit([&](handler &h) {
-      accessor accessor_result{buffer_result, h, write_only, no_init};
+    sycl::buffer<int, 1> buffer_result(result.data(), 1);
+    q.submit([&](sycl::handler &h) {
+      sycl::accessor accessor_result{buffer_result, h, sycl::write_only,
+                                     sycl::no_init};
 
       h.single_task<Kernel>([=]() [[intel::kernel_args_restrict]] {
         // Initialize counters the first time we use it
@@ -79,13 +81,14 @@ int main() {
   IntScalar result;
 
 #if defined(FPGA_EMULATOR)
-  ext::intel::fpga_emulator_selector selector;
+  sycl::ext::intel::fpga_emulator_selector selector;
 #else
-  ext::intel::fpga_selector selector;
+  sycl::ext::intel::fpga_selector selector;
 #endif
 
   // Increment each counter multiple times
-  for (auto num_increments = 1; num_increments <= kNumIncrements; num_increments++) {
+  for (auto num_increments = 1; num_increments <= kNumIncrements;
+       num_increments++) {
     // Increment each position
     for (auto counter_index = 0; counter_index < kNumCounters;
          counter_index++) {
