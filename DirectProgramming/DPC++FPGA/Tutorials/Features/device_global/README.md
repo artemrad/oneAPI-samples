@@ -6,7 +6,7 @@ This FPGA tutorial explains how to use `device_global` class as a way of keeping
 | OS                                | Linux* Ubuntu* 18.04/20.04 <br> RHEL*/CentOS* 8 <br> SUSE* 15 <br> Windows* 10
 | Hardware                          | Intel&reg; Programmable Acceleration Card (PAC) with Intel Arria&reg; 10 GX FPGA; <br> Intel&reg; FPGA Programmable Acceleration Card (PAC) D5005 (with Intel Stratix&reg; 10 SX) <br> Intel&reg; FPGA 3rd party / custom platforms with oneAPI support <br> **Note**: Intel&reg; FPGA PAC hardware is only compatible with Ubuntu 18.04*
 | Software                          | Intel&reg; oneAPI DPC++ Compiler <br> Intel&reg; FPGA Add-On for oneAPI Base Toolkit
-| What you will learn               | The basic usage of the `device_global` class <br> How initialize a `device_global` to non-zero values<br>
+| What you will learn               | The basic usage of the `device_global` class <br> How to initialize a `device_global` to non-zero values<br>
 | Time to complete                  | 15 minutes
 
 ## Purpose
@@ -15,25 +15,25 @@ This tutorial demonstrates a simple example of initializing a `device_global` to
 ### Description of `device_global`
 The `device_global` class is an extension that introduces device scoped memory allocations into SYCL that can be accessed within a kernel using syntax similar to C++ global variables, but that have unique instances per `sycl::device`. Similar to C++ global variables, a `device_global` variable have a namespace scope and is visible to all kernels within that scope.
 
-A `device_global` instance can be templated on a list of compile-time-constant `properties` that can enable various optimization behaviors. One such `property` is `device_image_scope` which is used in the code sample. It limits the scope of a single instance of a `device_global` to a `device_image`, further details on this property can be found [here](https://github.com/intel/llvm/blob/sycl/sycl/doc/extensions/proposed/sycl_ext_oneapi_device_global.asciidoc#properties-for-device-global-variables). The absence of the `device_image_scope` property is currently not supported by the compiler.
+`device_global` is a class template, parameterized by the type of the underlying allocation, and a list of properties. The type of the allocation also encodes the size of the allocation for potentially multidimensional array types. The list of properties change the functional behavior of the `device_global` instance to enable compiler and runtime optimizations. The `device_image_scope` property is used in the code sample, it limits the scope of a single instance of a `device_global` from a device to a `device_image`, further details on this property can be found [here](https://github.com/intel/llvm/blob/sycl/sycl/doc/extensions/proposed/sycl_ext_oneapi_device_global.asciidoc#properties-for-device-global-variables). The absence of the `device_image_scope` property is currently not supported by the compiler.
 
 A `device_global` instance can be used to store state across multiple re-launches of a kernel without having to pass in a `buffer` as a kernel argument. An example of an application that would benefit from such a state is where kernels are nodes in a state-machine.
 
-### Non-zero-initialization of a `device_global` - pre C++20
-Without C++20 `consteval` keyword support, a `device_global` is always zero-initialized. If there is a known first usage of a `device_global` in device code, there exists a technique, described below, that allows a `device_global` to be initialized to a non-zero value. 
+### How to initialize a `device_global` instance
+A `device_global` instance is always zero-initialized. If there is a known first usage of a `device_global` in device code, there exists a technique, described below, that allows a `device_global` to be initialized to a non-zero value. 
 
-Using a second `device_global<bool>` representing a flag that will control when to initialize the `device_global` to a non-zero value. This flag will get zero-initialized to `false`. Once initialization happens, the flag is set to `true` and initialization code doesn't execute on subsequent relaunches of the kernel.
+Instantiate a second `device_global<bool>` representing a flag that will control when to initialize the `device_global` to a non-zero value. This flag will get zero-initialized to `false`. Once initialization happens, the flag is set to `true` and initialization code doesn't execute on subsequent relaunches of the kernel.
 
 ```cpp
 using namespace sycl;
-using namespace sycl::ext::oneapi::experimental;
+using FPGAProperties = decltype(properties(device_image_scope));
 
-device_global<int> val;
-device_global<bool> is_val_initialized;
+sycl::ext::oneapi::experimental::device_global<int> val;
+sycl::ext::oneapi::experimental::device_global<bool> is_val_initialized;
 
 int main () {
-  queue Q;
-  Q.submit([&](sycl::handler& h) {
+  queue q;
+  q.submit([&](sycl::handler& h) {
     h.single_task([=] {
       // Initialization happens only once
       if (!is_val_initialized) {
@@ -47,14 +47,10 @@ int main () {
 }
 ```
 
-
-### Non-zero-initialization of a `device_global`- with C++20
 In a future version of this extension, it is expected that when C++20 support is available and enabled, the `consteval` keyword will be used to enable compile-time constant initialization of the device allocations backing `device_global`. This will simplify some coding patterns, compared with the current zero-initialization requirement.
 
 ```cpp
-using namespace sycl::ext::oneapi::experimental;
-
-device_global<int> val {42};
+sycl::ext::oneapi::experimental::device_global<int> val {42};
 ```
 
 ### Additional Documentation
@@ -66,22 +62,6 @@ device_global<int> val {42};
 ## Key Concepts
 * The basic usage of the `device_global` class
 * How initialize a `device_global` to non-zero value
-
-
-## Using Visual Studio Code*  (Optional)
-
-You can use Visual Studio Code (VS Code) extensions to set your environment, create launch configurations,
-and browse and download samples.
-
-The basic steps to build and run a sample using VS Code include:
- - Download a sample using the extension **Code Sample Browser for Intel&reg; oneAPI Toolkits**.
- - Configure the oneAPI environment with the extension **Environment Configurator for Intel&reg; oneAPI Toolkits**.
- - Open a Terminal in VS Code (**Terminal>New Terminal**).
- - Run the sample in the VS Code terminal using the instructions below.
- - (Linux only) Debug your GPU application with GDB for Intel&reg; oneAPI toolkits using the **Generate Launch Configurations** extension.
-
-To learn more about the extensions, see the 
-[Using Visual Studio Code with Intel&reg; oneAPI Toolkits User Guide](https://www.intel.com/content/www/us/en/develop/documentation/using-vs-code-with-intel-oneapi/top.html).
 
 
 ## Building the `device_global` Tutorial
@@ -198,6 +178,23 @@ dependencies and permissions errors.
 
 You can compile and run this tutorial in the Eclipse* IDE (in Linux*) and the Visual Studio* IDE (in Windows*). For instructions, refer to the following link: [FPGA Workflows on Third-Party IDEs for Intel&reg; oneAPI Toolkits](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-oneapi-dpcpp-fpga-workflow-on-ide.html).
 
+
+## Using Visual Studio Code*  (Optional)
+
+You can use Visual Studio Code (VS Code) extensions to set your environment, create launch configurations,
+and browse and download samples.
+
+The basic steps to build and run a sample using VS Code include:
+ - Download a sample using the extension **Code Sample Browser for Intel&reg; oneAPI Toolkits**.
+ - Configure the oneAPI environment with the extension **Environment Configurator for Intel&reg; oneAPI Toolkits**.
+ - Open a Terminal in VS Code (**Terminal>New Terminal**).
+ - Run the sample in the VS Code terminal using the instructions below.
+ - (Linux only) Debug your GPU application with GDB for Intel&reg; oneAPI toolkits using the **Generate Launch Configurations** extension.
+
+To learn more about the extensions, see the 
+[Using Visual Studio Code with Intel&reg; oneAPI Toolkits User Guide](https://www.intel.com/content/www/us/en/develop/documentation/using-vs-code-with-intel-oneapi/top.html).
+
+
 ## Running the Sample
 
  1. Run the sample on the FPGA emulator (the kernel executes on the CPU):
@@ -214,7 +211,6 @@ You can compile and run this tutorial in the Eclipse* IDE (in Linux*) and the Vi
 
 ### Example of Output
 ```
-PASSED_fpga_compile
 PASSED: The results are correct
 ```
 
