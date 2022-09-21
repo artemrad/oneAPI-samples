@@ -25,14 +25,14 @@ A `device_global` instance is always zero-initialized. If there is a known first
 Instantiate a second `device_global<bool>` representing a flag that will control when to initialize the `device_global` to a non-zero value. This flag will get zero-initialized to `false`. Once initialization happens, the flag is set to `true` and initialization code doesn't execute on subsequent relaunches of the kernel.
 
 ```cpp
-using namespace sycl;
-using FPGAProperties = decltype(properties(device_image_scope));
+using FPGAProperties = decltype(sycl::ext::oneapi::experimental::properties(
+    sycl::ext::oneapi::experimental::device_image_scope));
 
-sycl::ext::oneapi::experimental::device_global<int> val;
-sycl::ext::oneapi::experimental::device_global<bool> is_val_initialized;
+sycl::ext::oneapi::experimental::device_global<int, FPGAProperties> val;
+sycl::ext::oneapi::experimental::device_global<bool, FPGAProperties> is_val_initialized;
 
 int main () {
-  queue q;
+  sycl::queue q;
   q.submit([&](sycl::handler& h) {
     h.single_task([=] {
       // Initialization happens only once
@@ -50,7 +50,10 @@ int main () {
 In a future version of this extension, it is expected that when C++20 support is available and enabled, the `consteval` keyword will be used to enable compile-time constant initialization of the device allocations backing `device_global`. This will simplify some coding patterns, compared with the current zero-initialization requirement.
 
 ```cpp
-sycl::ext::oneapi::experimental::device_global<int> val {42};
+using FPGAProperties = decltype(sycl::ext::oneapi::experimental::properties(
+    sycl::ext::oneapi::experimental::device_image_scope));
+
+sycl::ext::oneapi::experimental::device_global<int, FPGAProperties> val {42};
 ```
 
 ### Additional Documentation
