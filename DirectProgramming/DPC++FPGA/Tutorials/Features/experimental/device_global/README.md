@@ -37,7 +37,7 @@ int main () {
     h.single_task([=] {
       // Initialization happens only once
       if (!is_val_initialized) {
-        // do initialization
+        val.get() = 42;
         is_val_initialized.get() = true;
       }
 
