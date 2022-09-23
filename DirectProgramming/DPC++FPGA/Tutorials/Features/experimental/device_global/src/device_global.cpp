@@ -17,17 +17,15 @@ constexpr size_t kNumCounters = 4;
 constexpr int kInitialValue = 10;
 constexpr unsigned kNumIncrements = 3;
 
+namespace exp = sycl::ext::oneapi::experimental;
+
 using IntScalar = std::array<int, 1>;
-using FPGAProperties = decltype(sycl::ext::oneapi::experimental::properties(
-    sycl::ext::oneapi::experimental::device_image_scope));
+using FPGAProperties = decltype(exp::properties(exp::device_image_scope));
 
 // Array of counters that have a lifetime longer than a single kernel invocation
-sycl::ext::oneapi::experimental::device_global<int[kNumCounters],
-                                               FPGAProperties>
-    counters;
+exp::device_global<int[kNumCounters], FPGAProperties> counters;
 // Flag if the counters have been initialized - zero-initialized to `false`
-sycl::ext::oneapi::experimental::device_global<bool, FPGAProperties>
-    is_counters_initialized;
+exp::device_global<bool, FPGAProperties> is_counters_initialized;
 
 // Forward declare the kernel name in the global scope.
 // This FPGA best practice reduces name mangling in the optimization reports.
