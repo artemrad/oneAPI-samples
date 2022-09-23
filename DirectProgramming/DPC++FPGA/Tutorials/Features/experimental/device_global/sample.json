@@ -1,5 +1,5 @@
 {
-  "guid": "CDC9540F-B89F-499E-BC27-E8EC9EA3B2D7",
+  "guid": "92110788-F876-4009-89A5-D1589B588D20",
   "name": "Device Global",
   "categories": ["Toolkit/oneAPI Direct Programming/DPC++ FPGA/Tutorials/Features/experimental"],
   "description": "An Intel® FPGA tutorial demonstrating how to use `device_global` class as a way of keeping state between multiple kernel invocations.",
@@ -40,7 +40,7 @@
           "cd ../../..",
           "mkdir build",
           "cd build",
-          "cmake -G \"NMake Makefiles\" ../Tutorials/Features/device_global",
+          "cmake -G \"NMake Makefiles\" ../Tutorials/Features/experimental/device_global",
           "nmake fpga_emu",
           "device_global.fpga_emu.exe"
         ]
@@ -52,7 +52,7 @@
           "cd ../../..",
           "mkdir build",
           "cd build",
-          "cmake -G \"NMake Makefiles\" ../Tutorials/Features/device_global",
+          "cmake -G \"NMake Makefiles\" ../Tutorials/Features/experimental/device_global",
           "nmake report"
         ]
       }
