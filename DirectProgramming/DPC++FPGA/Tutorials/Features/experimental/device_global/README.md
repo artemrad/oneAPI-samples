@@ -25,11 +25,12 @@ A `device_global` instance is always zero-initialized. If you need the first usa
 > Instantiate a second `device_global<bool>` that represents a flag that controls when to initialize the `device_global` to a non-zero value. This flag is zero-initialized to `false`. Once initialization happens, the flag is set to `true` and initialization code doesn't execute on subsequent relaunches of the kernel.
 
 ```cpp
-using FPGAProperties = decltype(sycl::ext::oneapi::experimental::properties(
-    sycl::ext::oneapi::experimental::device_image_scope));
+namespace exp = sycl::ext::oneapi::experimental;
+using FPGAProperties = decltype(exp::properties(
+    exp::device_image_scope));
 
-sycl::ext::oneapi::experimental::device_global<int, FPGAProperties> val;
-sycl::ext::oneapi::experimental::device_global<bool, FPGAProperties> is_val_initialized;
+exp::device_global<int, FPGAProperties> val;
+exp::device_global<bool, FPGAProperties> is_val_initialized;
 
 int main () {
   sycl::queue q;
