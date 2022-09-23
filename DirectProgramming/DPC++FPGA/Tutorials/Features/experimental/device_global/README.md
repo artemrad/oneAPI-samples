@@ -10,19 +10,19 @@ This FPGA tutorial explains how to use `device_global` class as a way of keeping
 | Time to complete                  | 15 minutes
 
 ## Purpose
-This tutorial demonstrates a simple example of initializing a `device_global` to a non-zero value, and using it to keep state between multiple re-launches of a kernel.
+This tutorial demonstrates a simple example of initializing a `device_global` class to a non-zero value, and using it to keep state between multiple re-launches of a kernel.
 
 ### Description of `device_global`
 The `device_global` class is an extension that introduces device scoped memory allocations into SYCL that can be accessed within a kernel using syntax similar to C++ global variables, but that have unique instances per `sycl::device`. Similar to C++ global variables, a `device_global` variable have a namespace scope and is visible to all kernels within that scope.
 
-`device_global` is a class template, parameterized by the type of the underlying allocation, and a list of properties. The type of the allocation also encodes the size of the allocation for potentially multidimensional array types. The list of properties change the functional behavior of the `device_global` instance to enable compiler and runtime optimizations. The `device_image_scope` property is used in the code sample, it limits the scope of a single instance of a `device_global` from a device to a `device_image`, further details on this property can be found [here](https://github.com/intel/llvm/blob/sycl/sycl/doc/extensions/proposed/sycl_ext_oneapi_device_global.asciidoc#properties-for-device-global-variables). The absence of the `device_image_scope` property is currently not supported by the compiler.
+A `device_global` class is instantiated from a class template. The template is parameterized by the type of the underlying allocation, and a list of properties. The type of the allocation also encodes the size of the allocation for potentially multidimensional array types. The list of properties change the functional behavior of the `device_global` instance to enable compiler and runtime optimizations. The `device_image_scope` property is used in the code sample, it limits the scope of a single instance of a `device_global` from a device to a `device_image`, further details on this property can be found in the [Properties for `device_global` variables](https://github.com/intel/llvm/blob/sycl/sycl/doc/extensions/proposed/sycl_ext_oneapi_device_global.asciidoc#properties-for-device-global-variables) section of the [SYCL `device_global` Language Specification](https://github.com/intel/llvm/blob/sycl/sycl/doc/extensions/proposed/sycl_ext_oneapi_device_global.asciidoc). The absence of the `device_image_scope` property is currently not supported by the compiler.
 
-A `device_global` instance can be used to store state across multiple re-launches of a kernel without having to pass in a `buffer` as a kernel argument. An example of an application that would benefit from such a state is where kernels are nodes in a state-machine.
+A `device_global` instance can be used to store state across multiple relaunches of a kernel without having to pass in a `buffer` as a kernel argument. An example of an application that would benefit from such a state is where kernels are nodes in a state-machine.
 
 ### How to initialize a `device_global` instance
-A `device_global` instance is always zero-initialized. If there is a known first usage of a `device_global` in device code, there exists a technique, described below, that allows a `device_global` to be initialized to a non-zero value. 
+A `device_global` instance is always zero-initialized. If you need the first usage of a `device_global` instance in device code to be initialized to a non-zero value, use the following technique:
 
-Instantiate a second `device_global<bool>` representing a flag that will control when to initialize the `device_global` to a non-zero value. This flag will get zero-initialized to `false`. Once initialization happens, the flag is set to `true` and initialization code doesn't execute on subsequent relaunches of the kernel.
+> Instantiate a second `device_global<bool>` that represents a flag that controls when to initialize the `device_global` to a non-zero value. This flag is zero-initialized to `false`. Once initialization happens, the flag is set to `true` and initialization code doesn't execute on subsequent relaunches of the kernel.
 
 ```cpp
 using FPGAProperties = decltype(sycl::ext::oneapi::experimental::properties(
@@ -45,15 +45,6 @@ int main () {
     });
   });
 }
-```
-
-In a future version of this extension, it is expected that when C++20 support is available and enabled, the `consteval` keyword will be used to enable compile-time constant initialization of the device allocations backing `device_global`. This will simplify some coding patterns, compared with the current zero-initialization requirement.
-
-```cpp
-using FPGAProperties = decltype(sycl::ext::oneapi::experimental::properties(
-    sycl::ext::oneapi::experimental::device_image_scope));
-
-sycl::ext::oneapi::experimental::device_global<int, FPGAProperties> val {42};
 ```
 
 ### Additional Documentation
