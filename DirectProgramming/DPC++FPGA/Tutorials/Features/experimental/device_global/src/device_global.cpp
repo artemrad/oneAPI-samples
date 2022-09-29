@@ -20,8 +20,8 @@ constexpr unsigned kNumIncrements = 3;
 namespace exp = sycl::ext::oneapi::experimental;
 
 using IntScalar = std::array<int, 1>;
-using FPGAProperties = decltype(exp::properties(exp::device_image_scope,
- exp::host_access_none));
+using FPGAProperties =
+    decltype(exp::properties(exp::device_image_scope, exp::host_access_none));
 
 // Array of counters that have a lifetime longer than a single kernel invocation
 exp::device_global<int[kNumCounters], FPGAProperties> counters;
