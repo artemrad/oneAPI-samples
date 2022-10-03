@@ -82,9 +82,9 @@ int main() {
 #if defined(FPGA_EMULATOR)
   sycl::ext::intel::fpga_emulator_selector selector;
 #elif defined(FPGA_SIMULATOR)
-  ext::intel::fpga_simulator_selector selector;
+  sycl::ext::intel::fpga_simulator_selector selector;
 #else
-  ext::intel::fpga_selector selector;
+  sycl::ext::intel::fpga_selector selector;
 #endif
 
   // Increment each counter multiple times
